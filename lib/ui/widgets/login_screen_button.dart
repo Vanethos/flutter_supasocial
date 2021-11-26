@@ -18,7 +18,10 @@ class LoginButton extends StatelessWidget {
       onPressed: () => enabled ? callback.call() : null,
       child: Padding(
         padding: const EdgeInsets.all(8.0),
-        child: Text(label),
+        child: Text(
+          label.toUpperCase(),
+          style: Theme.of(context).textTheme.button,
+        ),
       ),
     );
   }

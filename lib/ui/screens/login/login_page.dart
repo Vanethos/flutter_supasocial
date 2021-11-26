@@ -24,6 +24,7 @@ class _LoginScreenState extends State<LoginScreen> {
         child: Padding(
           padding: const EdgeInsets.all(24.0),
           child: Card(
+            elevation: 20,
             color: Theme.of(context).colorScheme.secondaryVariant,
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -97,19 +98,22 @@ class _LoginBoxHeaderButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
-      child: Container(
-        decoration: BoxDecoration(
-          color: isEnabled
-              ? Theme.of(context).colorScheme.primary
-              : Theme.of(context).colorScheme.secondaryVariant,
-          borderRadius: BorderRadius.circular(4.0),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: Center(
-            child: Text(
-              text,
-              style: Theme.of(context).textTheme.headline6,
+      child: Material(
+        elevation: isEnabled ? 10 : 0,
+        child: Container(
+          decoration: BoxDecoration(
+            color: isEnabled
+                ? Theme.of(context).colorScheme.primary
+                : Theme.of(context).colorScheme.secondaryVariant,
+            borderRadius: BorderRadius.circular(4.0),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: Center(
+              child: Text(
+                text,
+                style: Theme.of(context).textTheme.headline6,
+              ),
             ),
           ),
         ),
@@ -135,11 +139,13 @@ class __LoginContainerState extends State<_LoginContainer> {
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         /// Email
         LoginScreenForm(
           controller: emailController,
           hint: "Email",
+          inputType: TextInputType.emailAddress,
         ),
         const SizedBox(
           height: 12.0,
@@ -147,6 +153,7 @@ class __LoginContainerState extends State<_LoginContainer> {
         LoginScreenForm(
           controller: passwordController,
           hint: "Password",
+          obscureText: true,
         ),
         const SizedBox(
           height: 24.0,
