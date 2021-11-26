@@ -10,7 +10,7 @@ class AwesomeNetworkApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: appTheme,
-      home: const LoginScreen(title: 'Flutter Demo Home Page'),
+      home: const LoginScreen(),
     );
   }
 }
