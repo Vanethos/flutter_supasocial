@@ -5,11 +5,13 @@ class LoginScreenForm extends StatefulWidget {
   final bool obscureText;
   final TextEditingController controller;
   final TextInputType inputType;
+  final Function(String)? onChanged;
 
   const LoginScreenForm({
     Key? key,
     required this.hint,
     required this.controller,
+    this.onChanged,
     this.obscureText = false,
     this.inputType = TextInputType.text,
   }) : super(key: key);
@@ -38,6 +40,7 @@ class _LoginScreenFormState extends State<LoginScreenForm> {
       child: TextFormField(
         controller: widget.controller,
         obscureText: _textObscured,
+        onChanged: widget.onChanged,
         decoration: InputDecoration(
           suffixIcon: widget.obscureText
               ? (_textObscured

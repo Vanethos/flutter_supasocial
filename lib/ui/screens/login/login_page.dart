@@ -1,18 +1,25 @@
+import 'package:awesome_network/repositories/authentication/authentication_repository.dart';
+import 'package:awesome_network/ui/navigation/navigation.dart';
+import 'package:awesome_network/ui/utils/utils.dart';
 import 'package:awesome_network/ui/widgets/login_screen_button.dart';
 import 'package:awesome_network/ui/widgets/login_screen_form.dart';
 import 'package:flutter/material.dart';
 
-class LoginScreen extends StatefulWidget {
-  const LoginScreen({
+class LoginPage extends StatefulWidget {
+  final AuthenticationRepository authenticationRepository;
+  const LoginPage({
+    required this.authenticationRepository,
     Key? key,
   }) : super(key: key);
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  State<LoginPage> createState() => _LoginPageState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _LoginPageState extends State<LoginPage> {
   int _index = 0;
+
+  bool _isLoading = false;
 
   @override
   Widget build(BuildContext context) {
@@ -20,65 +27,118 @@ class _LoginScreenState extends State<LoginScreen> {
       appBar: AppBar(
         title: const Text('Login ⚡'),
       ),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Card(
-            elevation: 20,
-            color: Theme.of(context).colorScheme.secondaryVariant,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: _LoginBoxHeaderButton(
-                        onTap: () => setState(() {
-                          _index = 0;
-                        }),
-                        isEnabled: _isLoginPage(),
-                        text: "Login",
-                      ),
-                    ),
-                    Expanded(
-                      child: _LoginBoxHeaderButton(
-                        onTap: () => setState(() {
-                          _index = 1;
-                        }),
-                        isEnabled: !_isLoginPage(),
-                        text: "Subscribe",
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(
-                  height: 12.0,
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(12.0),
-                  child: IndexedStack(
-                    alignment: Alignment.center,
-                    index: _index,
+      body: Stack(
+        fit: StackFit.expand,
+        children: [
+          Center(
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.all(24.0),
+                child: Card(
+                  elevation: 20,
+                  color: Theme.of(context).colorScheme.secondaryVariant,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      _LoginContainer(
-                        onLogin: (email, password) {},
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _LoginBoxHeaderButton(
+                              onTap: () => setState(() {
+                                _index = 0;
+                              }),
+                              isEnabled: _isLoginPage(),
+                              text: "Login",
+                            ),
+                          ),
+                          Expanded(
+                            child: _LoginBoxHeaderButton(
+                              onTap: () => setState(() {
+                                _index = 1;
+                              }),
+                              isEnabled: !_isLoginPage(),
+                              text: "Subscribe",
+                            ),
+                          ),
+                        ],
                       ),
-                      _SubscribeContainer(
-                        onSubscribe: (name, email, password) {},
+                      const SizedBox(
+                        height: 12.0,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(12.0),
+                        child: IndexedStack(
+                          alignment: Alignment.center,
+                          index: _index,
+                          children: [
+                            _LoginContainer(
+                              onLogin: (email, password) async {
+                                setState(() {
+                                  _isLoading = true;
+                                });
+                                final successfulLogin = await widget
+                                    .authenticationRepository
+                                    .signIn(email, password);
+                                setState(() {
+                                  _isLoading = false;
+                                });
+                                if (!successfulLogin) {
+                                  await showInfoDialog(context, "Login",
+                                      "There was an error with Login");
+                                  return;
+                                }
+
+                                navigateToTimeline(context);
+                              },
+                            ),
+                            _SubscribeContainer(
+                              onSubscribe: (name, email, password) async {
+                                setState(() {
+                                  _isLoading = true;
+                                });
+                                final successfulLogin = await widget
+                                    .authenticationRepository
+                                    .subscribe(email, password);
+                                setState(() {
+                                  _isLoading = false;
+                                });
+                                if (!successfulLogin) {
+                                  await showInfoDialog(context, "Subscribe",
+                                      "There was an error when creating your user");
+                                  return;
+                                }
+
+                                /// Navigates to Timeline
+                                _onAuthenticated(context);
+                              },
+                            ),
+                          ],
+                        ),
                       ),
                     ],
                   ),
                 ),
-              ],
+              ),
             ),
           ),
-        ),
+          if (_isLoading)
+            Container(
+              color: Colors.black45,
+              child: const Center(
+                child: CircularProgressIndicator(),
+              ),
+            ),
+        ],
       ),
     );
   }
 
   bool _isLoginPage() {
     return _index == 0;
+  }
+
+  Future<void> _onAuthenticated(BuildContext context) {
+    return navigateToTimeline(context);
   }
 }
 
@@ -146,6 +206,7 @@ class __LoginContainerState extends State<_LoginContainer> {
           controller: emailController,
           hint: "Email",
           inputType: TextInputType.emailAddress,
+          onChanged: (_) => setState(() {}),
         ),
         const SizedBox(
           height: 12.0,
@@ -154,6 +215,7 @@ class __LoginContainerState extends State<_LoginContainer> {
           controller: passwordController,
           hint: "Password",
           obscureText: true,
+          onChanged: (_) => setState(() {}),
         ),
         const SizedBox(
           height: 24.0,
@@ -196,6 +258,7 @@ class __SubscribeContainerState extends State<_SubscribeContainer> {
         LoginScreenForm(
           controller: nameController,
           hint: "Name",
+          onChanged: (_) => setState(() {}),
         ),
         const SizedBox(
           height: 12.0,
@@ -205,6 +268,7 @@ class __SubscribeContainerState extends State<_SubscribeContainer> {
         LoginScreenForm(
           controller: emailController,
           hint: "Email",
+          onChanged: (_) => setState(() {}),
         ),
         const SizedBox(
           height: 12.0,
@@ -215,6 +279,7 @@ class __SubscribeContainerState extends State<_SubscribeContainer> {
           controller: passwordController,
           hint: "Password",
           obscureText: true,
+          onChanged: (_) => setState(() {}),
         ),
         const SizedBox(
           height: 24.0,
@@ -227,7 +292,7 @@ class __SubscribeContainerState extends State<_SubscribeContainer> {
             emailController.text,
             passwordController.text,
           ),
-          label: "Login",
+          label: "Subscribe",
         ),
       ],
     );

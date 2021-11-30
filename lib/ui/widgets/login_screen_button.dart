@@ -14,8 +14,11 @@ class LoginButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ElevatedButton(
+    return MaterialButton(
       onPressed: () => enabled ? callback.call() : null,
+      color: enabled
+          ? Theme.of(context).colorScheme.primary
+          : Theme.of(context).colorScheme.primary.withOpacity(0.5),
       child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Text(
